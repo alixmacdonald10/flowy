@@ -1,0 +1,6 @@
+[window]
+resizable = false
+
+[window.resolution]
+width = 640
+height = 480
