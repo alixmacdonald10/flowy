@@ -236,8 +236,6 @@ pub fn update_cursor_idx(
             );
             match xy_index.index.get(&cell_centre) {
                 Some(idx) => {
-                    println!("Cell centre: {:#?}", cell_centre);
-                    println!("Cell index: {:#?}", idx);
                     cursor_idx.index = Some(idx.to_owned());
                 },
                 None => {
