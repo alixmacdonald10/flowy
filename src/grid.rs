@@ -77,10 +77,8 @@ fn create_grid_index(
     for horiz_cell in 0..number_of_horizontal_cells {
         for vert_cell in 0..number_of_vertical_cells {
             let left = horiz_cell * cell_width;
-            let right = left + cell_width;
             let x = left + (cell_width / 2);
             let top = vert_cell * cell_height;
-            let bottom = top + cell_height;
             let y = top + (cell_height / 2);
 
             grid_index.index.insert(
