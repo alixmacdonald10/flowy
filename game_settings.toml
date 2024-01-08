@@ -4,3 +4,7 @@ resizable = false
 [window.resolution]
 width = 640
 height = 480
+
+[grid]
+cell_width = 32
+cell_height = 32

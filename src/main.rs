@@ -1,13 +1,13 @@
 mod utils;
 mod cursor;
 mod piping;
+// mod grid;
 
 use bevy::{
     prelude::*,
-    core_pipeline::clear_color::ClearColorConfig,
-    window::PrimaryWindow
+    core_pipeline::clear_color::ClearColorConfig
 };
-use toml;
+
 
 use cursor::{update_cursor_position, CursorWorldCoords};
 use piping::handle_mouse_click;
@@ -23,9 +23,7 @@ static SETTINGS_STR: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/g
 
 fn main() {
 
-    // im ok with tanking the game here if theres no settings file...
-    let game_settings: GameSettings = toml::from_str(SETTINGS_STR).unwrap();
-    println!("{:#?}", game_settings);
+    let game_settings = GameSettings::default();
 
     // TODO: use bevy asset loader for load screen.
     App::new()
@@ -43,6 +41,7 @@ fn main() {
                 })
                 .build(),
         )
+        .init_resource::<GameSettings>()
         .init_resource::<CursorWorldCoords>()
         .add_systems(Startup, setup)
         .add_systems(Update, (update_cursor_position, handle_mouse_click).chain())
