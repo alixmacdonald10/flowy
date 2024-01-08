@@ -4,8 +4,10 @@ use std::fmt::Debug;
 use bevy::{
     prelude::*,
     utils::Uuid,
-    window::PrimaryWindow
+    window::PrimaryWindow,
+    sprite::{SpriteBundle, Sprite},
 };
+use crate::utils::colours::{GamePallete, get_colour};
 
 use crate::utils::game_settings::GameSettings;
 
@@ -21,7 +23,7 @@ impl Plugin for GridPlugin {
             .init_resource::<Grid>()
             .init_resource::<CursorGridIdx>()
             .add_systems(Startup, (create_grid_index, create_xy_index, create_grid).chain())
-            .add_systems(Update, update_cursor_idx);
+            .add_systems(Update, (update_cursor_idx, handle_mouse_click).chain());
     }
 }
 
@@ -181,7 +183,6 @@ fn create_grid(
             }
         );
     }
-    println!("{:#?}", grid);
 }
 
 #[derive(Debug)]
@@ -225,7 +226,7 @@ pub fn update_cursor_idx(
     xy_index: Res<XYIndex>,
     q_window: Query<&Window, With<PrimaryWindow>>
 ) {
-    // There is only one primary window, so we can similarly get it from the query:
+    // There is only one primary window, so we can get it from the query:
     let window = q_window.single();
 
     if let Some(world_position) = window.cursor_position()
@@ -243,4 +244,44 @@ pub fn update_cursor_idx(
                 }
             }
         }
+}
+
+
+pub fn handle_mouse_click(
+    input: Res<Input<MouseButton>>,
+    cursor_idx: Res<CursorGridIdx>,
+    grid_settings: Res<GridSettings>,
+    grid: Res<Grid>,
+    q_camera: Query<(&Camera, &GlobalTransform)>,
+    mut commands: Commands) {
+
+// TODO: add noises on some mouse clicks. scale these to budgets (if over make disgruntled noises and get progressively
+// more disgruntled the more over budget you are) if under budget make happy noises and get progressively happier the more
+// under budget you are. if you are on budget make neutral noises. if you are very close to the budget make uneasy noises.
+
+    if input.just_pressed(MouseButton::Left) {
+
+        // TODO: LOG POSITION OF CLICK IN WORLD COORDS AS NEW PIPE SEGMENT
+        // TODO: CHECK IF NO ACTIVE PIPE SEGMENTS AND ADD PIPE SEGMENT ID TO MAP OF PIPE SEGMENTS WITH KEY AS LOCATION, SET ACTIVE PIPE SEGEMENT TO TRUE
+        // TODO: CHECK IF THERE IS AN ACTIVE PIPE SEGMENT IF SO THEN DEACTIVATE IT AND PLACE FINAL PIPE
+
+        let cursor_cell_idx = cursor_idx.index.unwrap();
+        let grid_centre = grid.cells.get(&cursor_cell_idx).unwrap().centre;
+
+        let (camera, camera_transform) = q_camera.single();
+        if let Some(ray) = camera.viewport_to_world(camera_transform, Vec2::new(grid_centre.0 as f32, grid_centre.1 as f32)) {
+            let truncated_ray =             ray.origin.truncate();
+
+            // TODO: REMOVE THIS TEST SPAWN
+            commands.spawn(SpriteBundle {
+                sprite: Sprite {
+                    custom_size: Some(Vec2::new(grid_settings.cell_width as f32, grid_settings.cell_height as f32)),
+                    color: get_colour(GamePallete::DarkCharcoal),
+                    ..default()
+                },
+                transform: Transform::from_translation(Vec3::new(truncated_ray.x, truncated_ray.y, 0.0)),
+                ..default()
+            });
+        };
+    }
 }

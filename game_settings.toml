@@ -3,8 +3,8 @@ resizable = false
 
 [window.resolution]
 width = 640
-height = 480
+height = 360
 
 [grid]
-cell_width = 8
-cell_height = 8
+cell_width = 20
+cell_height = 20

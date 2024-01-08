@@ -1,6 +1,4 @@
 mod utils;
-mod cursor;
-mod piping;
 mod grid;
 
 use bevy::{
@@ -8,9 +6,6 @@ use bevy::{
     core_pipeline::clear_color::ClearColorConfig
 };
 
-
-use cursor::{update_cursor_position, CursorWorldCoords};
-use piping::handle_mouse_click;
 use utils::colours::{GamePallete, get_colour};
 use utils::game_settings::GameSettings;
 use grid::GridPlugin;
@@ -43,27 +38,20 @@ fn main() {
                 .build(),
         )
         .init_resource::<GameSettings>()
-        .init_resource::<CursorWorldCoords>()
         .add_systems(Startup, setup)
         .add_plugins(GridPlugin)
-        .add_systems(Update, (update_cursor_position, handle_mouse_click).chain())
         .run();
 }
 
 
-/// Used to help identify our main camera
-#[derive(Component)]
-pub struct MainCamera;
-
-fn setup(mut commands: Commands) {
-    commands.spawn((
+fn setup(mut commands: Commands, game_settings: Res<GameSettings>) {
+    commands.spawn(
         Camera2dBundle {
             camera_2d: Camera2d {
                 clear_color: ClearColorConfig::Custom(get_colour(GamePallete::DarkSeaGreen)),
             },
             ..default()
-        },
-        MainCamera)
+        }
     );
 }
 
