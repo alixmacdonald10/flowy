@@ -28,12 +28,12 @@ pub struct WindowGameSettings {
 
 #[derive(Deserialize, Debug)]
 pub struct ResolutionGameSettings {
-    pub width: f32,
-    pub height: f32,
+    pub width: i32,
+    pub height: i32,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct GridGameSettings {
-    pub cell_width: f32,
-    pub cell_height: f32,
+    pub cell_width: i32,
+    pub cell_height: i32,
 }

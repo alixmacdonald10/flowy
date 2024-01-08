@@ -17,3 +17,6 @@ The pipes can be placed wherever you want, but you must make sure that the water
 - Mouse Wheel: Select Equipment to place
 
 
+# Grid system
+Flowy is built on a grid system. Each grid cell has a UUID all actions performed by the mouse are mapped to a grid cell using a simple, fast uuid look up instead of a series of complex calculations. This allows for a very fast and responsive game at the expense of some setup time.
+

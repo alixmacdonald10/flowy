@@ -1,7 +1,7 @@
 mod utils;
 mod cursor;
 mod piping;
-// mod grid;
+mod grid;
 
 use bevy::{
     prelude::*,
@@ -13,6 +13,7 @@ use cursor::{update_cursor_position, CursorWorldCoords};
 use piping::handle_mouse_click;
 use utils::colours::{GamePallete, get_colour};
 use utils::game_settings::GameSettings;
+use grid::GridPlugin;
 
 
 const GAME_TITLE: &str = env!("CARGO_PKG_NAME");
@@ -33,7 +34,7 @@ fn main() {
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         title: format!("{}_v{}", GAME_TITLE, GAME_VERSION),
-                        resolution: (game_settings.window.resolution.width, game_settings.window.resolution.height).into(),
+                        resolution: (game_settings.window.resolution.width as f32, game_settings.window.resolution.height as f32).into(),
                         resizable: game_settings.window.resizable,
                         ..default()
                     }),
@@ -44,6 +45,7 @@ fn main() {
         .init_resource::<GameSettings>()
         .init_resource::<CursorWorldCoords>()
         .add_systems(Startup, setup)
+        .add_plugins(GridPlugin)
         .add_systems(Update, (update_cursor_position, handle_mouse_click).chain())
         .run();
 }
