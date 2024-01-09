@@ -2,9 +2,9 @@
 resizable = false
 
 [window.resolution]
-width = 640
-height = 360
+width = 64
+height = 36
 
 [grid]
-cell_width = 20
-cell_height = 20
+cell_width = 32
+cell_height = 18

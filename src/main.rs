@@ -1,5 +1,7 @@
 mod utils;
 mod grid;
+mod cursor;
+
 
 use bevy::{
     prelude::*,
@@ -8,7 +10,8 @@ use bevy::{
 
 use utils::colours::{GamePallete, get_colour};
 use utils::game_settings::GameSettings;
-use grid::GridPlugin;
+use grid::grid::GridPlugin;
+use crate::cursor::CursorPlugin;
 
 
 const GAME_TITLE: &str = env!("CARGO_PKG_NAME");
@@ -40,6 +43,7 @@ fn main() {
         .init_resource::<GameSettings>()
         .add_systems(Startup, setup)
         .add_plugins(GridPlugin)
+        .add_plugins(CursorPlugin)
         .run();
 }
 
