@@ -9,6 +9,7 @@ use crate::SETTINGS_STR;
 pub struct GameSettings {
     pub window: WindowGameSettings,
     pub grid: GridGameSettings,
+    pub assets: AssetSettings,
 }
 
 impl Default for GameSettings {
@@ -36,4 +37,23 @@ pub struct ResolutionGameSettings {
 pub struct GridGameSettings {
     pub cell_width: i32,
     pub cell_height: i32,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct AssetSettings {
+    pub straight_pipe: AssetMeta,
+    pub bend: AssetMeta,
+    pub tee: AssetMeta,
+    pub quad: AssetMeta,
+    pub pump: AssetMeta,
+    pub pump_station: AssetMeta,
+    pub home: AssetMeta,
+    pub business: AssetMeta,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct AssetMeta {
+    pub name: String,
+    pub path: String,
+    pub cost: i32,
 }

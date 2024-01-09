@@ -2,9 +2,76 @@
 resizable = false
 
 [window.resolution]
-width = 64
-height = 36
+width = 640
+height = 360
 
 [grid]
 cell_width = 32
 cell_height = 18
+
+# [gameplay]
+# [levels]
+# [levels.level_1]
+# path = "levels/level_1.txt"
+# start_budget = 10
+
+# [levels.level_2]
+# path = "levels/level_2.txt"
+# start_budget = 20
+
+# [levels.level_3]
+# path = "levels/level_3.txt"
+# start_budget = 30
+
+# [levels.level_4]
+# path = "levels/level_4.txt"
+# start_budget = 40
+
+# [levels.level_5]
+# path = "levels/level_5.txt"
+# start_budget = 50
+
+# [levels.level_6]
+# path = "levels/level_6.txt"
+# start_budget = 10
+
+[assets]
+[assets.straight_pipe]
+name = "straight_pipe"
+path = "assets/pipe.png"
+cost = 1
+
+[assets.bend]
+name = "bend"
+path = "assets/bend.png"
+cost = 2
+
+[assets.tee]
+name = "tee"
+path = "assets/tee.png"
+cost = 3
+
+[assets.quad]
+name = "quad"
+path = "assets/quad.png"
+cost = 5
+
+[assets.pump]
+name = "pump"
+path = "assets/pump.png"
+cost = 10
+
+[assets.pump_station]
+name = "pump_station"
+path = "assets/pump_station.png"
+cost = 0
+
+[assets.home]
+name = "home"
+path = "assets/home.png"
+cost = 0
+
+[assets.business]
+name = "business"
+path = "assets/business.png"
+cost = 0
