@@ -105,8 +105,11 @@ pub struct SpawnedEquipment;
 
 pub fn handle_equipment(
     mut queue: ResMut<DumbScheduler>,
+    grid_settings: Res<GridSettings>,
+    grid: Res<Grid>,
     mut commands: Commands,
     existing_equipment: Query<(Entity, &Equipment), With<SpawnedEquipment>>,
+    q_camera: Query<(&Camera, &GlobalTransform)>,
 ) {
 
     let mut existing_entities = HashMap::new();
@@ -120,34 +123,31 @@ pub fn handle_equipment(
                 commands.entity(entity.0).despawn();
             },
             None => {
-                commands.spawn((Equipment{ cell_idx }, SpawnedEquipment));
+                
+                let (camera, camera_transform) = q_camera.single();
+                let current_cell = grid.cells.get(&cell_idx).unwrap();
+                let cell_centre = &current_cell.centre;
+            
+                if let Some(ray) = camera.viewport_to_world(camera_transform, Vec2::new(cell_centre.x as f32, cell_centre.y as f32)) {
+                    let truncated_ray = ray.origin.truncate();
+
+                    commands.spawn(
+                        (
+                            Equipment{ cell_idx },
+                            SpawnedEquipment,
+                            SpriteBundle {
+                                sprite: Sprite {
+                                    custom_size: Some(Vec2::new(grid_settings.cell_width as f32, grid_settings.cell_height as f32)),
+                                    color: get_colour(GamePallete::Coconut),
+                                    ..default()
+                                },
+                                transform: Transform::from_xyz(truncated_ray.x, truncated_ray.y, 0.0),
+                                ..default()
+                            }
+                        )
+                    );
+                }
             }
         }
     }
 }
-
-
-
-// pub fn handle_mouse_click(
-//     input: Res<Input<MouseButton>>,
-//     cursor_idx: Res<CursorGridIdx>,
-//     grid_settings: Res<GridSettings>,
-//     mut grid: ResMut<Grid>,
-//     q_camera: Query<(&Camera, &GlobalTransform)>,
-//     game_settings: Res<GameSettings>,
-//     mut placement_toggle: ResMut<PlacingComponents>,
-//     mut commands: Commands) {
-// let current_cell_idx = cursor_idx.index.unwrap();
-// let current_cell = grid.cells.get_mut(&current_cell_idx).unwrap();
-
-    // TODO: TOGGLE PLACING IF NEXT TO ANY RESOURCE
-    
-//     };
-// }
-
-// let (camera, camera_transform) = q_camera.single();
-//             let cell_centre = &current_cell.centre;
-            
-//             if let Some(ray) = camera.viewport_to_world(camera_transform, Vec2::new(cell_centre.x as f32, cell_centre.y as f32)) {
-//                 let truncated_ray = ray.origin.truncate();
-                
