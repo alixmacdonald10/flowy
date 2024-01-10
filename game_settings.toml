@@ -3,11 +3,14 @@ resizable = false
 
 [window.resolution]
 width = 640
-height = 360
+height = 640
 
 [grid]
-cell_width = 32
-cell_height = 18
+cell_width = 64
+cell_height = 64
+
+[gameplay]
+budget = 10
 
 # [gameplay]
 # [levels]

@@ -80,7 +80,7 @@ pub struct Grid {
 
 #[derive(Component, Default, Debug)]
 pub struct Cell {
-    pub uuid: Uuid,
+    pub id: Uuid,
     /// The x,y position of the cell in the grid
     pub centre: CellCentre,
     /// The bounds of the cell (Left, Right, Top, Bottom)
@@ -111,8 +111,8 @@ pub struct CursorGridIdx {
 
 
 fn create_grid_index(
-    mut grid_index: ResMut<GridIndex>,
     game_settings: Res<GameSettings>,
+    mut grid_index: ResMut<GridIndex>,
     mut grid_settings: ResMut<GridSettings>
 ) {
     let cell_width = game_settings.grid.cell_width;
@@ -195,7 +195,7 @@ fn create_grid(
         grid.cells.insert(
             cell_uuid,
             Cell {
-                uuid: cell_uuid,
+                id: cell_uuid,
                 centre: CellCentre::new(centre_x, centre_y),
                 bounds: (left, right, top, bottom),
                 occupied: false,
@@ -257,9 +257,9 @@ fn fill_all_cell_neighbours(
 
 
 pub fn update_cursor_idx(
-    mut cursor_idx: ResMut<CursorGridIdx>,
     grid_settings: Res<GridSettings>,
     xy_index: Res<XYIndex>,
+    mut cursor_idx: ResMut<CursorGridIdx>,
     q_window: Query<&Window, With<PrimaryWindow>>
 ) {
     // There is only one primary window, so we can get it from the query:

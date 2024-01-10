@@ -1,14 +1,4 @@
-use std::collections::{ VecDeque, HashMap };
-
-use bevy::{
-    prelude::*,
-    sprite::{SpriteBundle, Sprite},
-    utils::Uuid,
-};
-
-use crate::{utils::colours::{GamePallete, get_colour}, grid::grid::XYIndex};
-use crate::grid::grid::{GridSettings, Grid, CursorGridIdx};
-use crate::GameSettings;
+use bevy::prelude::*;
 
 
 
@@ -19,20 +9,16 @@ impl Plugin for CursorPlugin {
         app
             .init_resource::<PlacingComponents>()
             .init_resource::<DeletingComponents>()
-            .init_resource::<DumbScheduler>()
-            .add_systems(Update, handle_mouse_click)
-            .add_systems(Update, (toggle_cell_occupation, handle_equipment).chain());
+            .add_systems(Update, handle_mouse_click);
     }
 }
 
 #[derive(Resource, Default)]
-pub struct PlacingComponents(bool);
+pub struct PlacingComponents(pub bool);
 
 #[derive(Resource, Default)]
-pub struct DeletingComponents(bool);
+pub struct DeletingComponents(pub bool);
 
-#[derive(Resource, Default)]
-pub struct DumbScheduler(VecDeque<Uuid>); 
 
 /// Start or end placement/deletion mode when the mouse is clicked.
 /// Placement mode is controlled with left mouse button.
@@ -57,91 +43,6 @@ pub fn handle_mouse_click(
             deletion_toggle.0 = false;
         } else {
             deletion_toggle.0 = true;
-        }
-    }
-}
-
-
-/// If you are in placement mode, the cells your mouse moves over are toggled to occupied.
-/// If you are in deletion mode, the cells your mouse moves over are toggled to unoccupied.
-pub fn toggle_cell_occupation(
-    placement_toggle: ResMut<PlacingComponents>,
-    deletion_toggle: ResMut<DeletingComponents>,
-    cursor_idx: Res<CursorGridIdx>,
-    mut grid: ResMut<Grid>,
-    mut queue: ResMut<DumbScheduler>,
-) {
-    if let Some(cursor_index) = cursor_idx.index {
-        let current_cell = grid.cells.get_mut(&cursor_index).unwrap();  // at this point we know it exists so unwrap fine
-
-        if placement_toggle.0 {
-            if current_cell.occupied == false {
-                current_cell.occupied = true;
-                queue.0.push_front(cursor_index);
-            }
-        } else if deletion_toggle.0 {
-            if current_cell.occupied == true {
-                current_cell.occupied = false;
-                queue.0.push_front(cursor_index);
-            }
-        }
-    }
-}
-
-#[derive(Component, Debug)]
-pub struct Equipment {
-    cell_idx: Uuid
-}
-
-#[derive(Component)]
-pub struct SpawnedEquipment;
-
-/// Spawns equipment from the queue if it doesn't exist. If it does then it despawns it.
-pub fn handle_equipment(
-    mut queue: ResMut<DumbScheduler>,
-    grid_settings: Res<GridSettings>,
-    grid: Res<Grid>,
-    mut commands: Commands,
-    existing_equipment: Query<(Entity, &Equipment), With<SpawnedEquipment>>,
-    q_camera: Query<(&Camera, &GlobalTransform)>,
-) {
-
-    let mut existing_entities = HashMap::new();
-    for entity in existing_equipment.into_iter() {
-        existing_entities.insert(entity.1.cell_idx, entity);
-    };
-
-    for cell_idx in queue.0.drain(..) {
-        match existing_entities.get(&cell_idx) {
-            Some(entity) => {
-                commands.entity(entity.0).despawn();
-            },
-            None => {
-                
-                let (camera, camera_transform) = q_camera.single();
-                let current_cell = grid.cells.get(&cell_idx).unwrap();
-                let cell_centre = &current_cell.centre;
-            
-                if let Some(ray) = camera.viewport_to_world(camera_transform, Vec2::new(cell_centre.x as f32, cell_centre.y as f32)) {
-                    let truncated_ray = ray.origin.truncate();
-
-                    commands.spawn(
-                        (
-                            Equipment{ cell_idx },
-                            SpawnedEquipment,
-                            SpriteBundle {
-                                sprite: Sprite {
-                                    custom_size: Some(Vec2::new(grid_settings.cell_width as f32, grid_settings.cell_height as f32)),
-                                    color: get_colour(GamePallete::Coconut),
-                                    ..default()
-                                },
-                                transform: Transform::from_xyz(truncated_ray.x, truncated_ray.y, 0.0),
-                                ..default()
-                            }
-                        )
-                    );
-                }
-            }
         }
     }
 }
