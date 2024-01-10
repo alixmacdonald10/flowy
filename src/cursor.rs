@@ -44,22 +44,18 @@ pub fn handle_mouse_click(
     mut deletion_toggle: ResMut<DeletingComponents>,
 ) {
 
-    if input.just_pressed(MouseButton::Left) && deletion_toggle.0 == false {
+    if input.just_pressed(MouseButton::Left) && !deletion_toggle.0 {
 
-        if placement_toggle.0 == true {
+        if placement_toggle.0 {
             placement_toggle.0 = false;
-            println!("Ending placement");
         } else {
-            println!("Starting placement");
             placement_toggle.0 = true;
         }
-    } else if input.just_pressed(MouseButton::Right) && placement_toggle.0 == false {
+    } else if input.just_pressed(MouseButton::Right) && !placement_toggle.0 {
 
-        if deletion_toggle.0 == true {
+        if deletion_toggle.0 {
             deletion_toggle.0 = false;
-            println!("Ending deletion");
         } else {
-            println!("Starting deletion");
             deletion_toggle.0 = true;
         }
     }
@@ -78,16 +74,14 @@ pub fn toggle_cell_occupation(
     if let Some(cursor_index) = cursor_idx.index {
         let current_cell = grid.cells.get_mut(&cursor_index).unwrap();  // at this point we know it exists so unwrap fine
 
-        if placement_toggle.0 == true {
+        if placement_toggle.0 {
             if current_cell.occupied == false {
                 current_cell.occupied = true;
-                println!("Placing equipment at {:#?}", cursor_index);
                 queue.0.push_front(cursor_index);
             }
-        } else if deletion_toggle.0 == true {
+        } else if deletion_toggle.0 {
             if current_cell.occupied == true {
                 current_cell.occupied = false;
-                println!("Removing equipment at {:#?}", cursor_index);
                 queue.0.push_front(cursor_index);
             }
         }
@@ -102,7 +96,7 @@ pub struct Equipment {
 #[derive(Component)]
 pub struct SpawnedEquipment;
 
-
+/// Spawns equipment from the queue if it doesn't exist. If it does then it despawns it.
 pub fn handle_equipment(
     mut queue: ResMut<DumbScheduler>,
     grid_settings: Res<GridSettings>,
