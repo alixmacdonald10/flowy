@@ -5,7 +5,8 @@ mod equipment;
 
 use bevy::{
     prelude::*,
-    core_pipeline::clear_color::ClearColorConfig
+    core_pipeline::clear_color::ClearColorConfig,
+    app::AppExit,
 };
 
 use utils::colours::{GamePallete, get_colour};
@@ -19,6 +20,9 @@ const GAME_TITLE: &str = env!("CARGO_PKG_NAME");
 const GAME_VERSION: &str = env!("CARGO_PKG_VERSION");
 static SETTINGS_STR: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/game_settings.toml"));
 
+
+#[derive(Event)]
+pub struct GameOver;
 
 
 fn main() {
@@ -42,7 +46,9 @@ fn main() {
                 .build(),
         )
         .init_resource::<GameSettings>()
+        .add_event::<GameOver>()
         .add_systems(Startup, setup)
+        .add_systems(Update, exit_game)
         .add_plugins(GridPlugin)
         .add_plugins(CursorPlugin)
         .add_plugins(EquipmentPlugin)
@@ -50,7 +56,7 @@ fn main() {
 }
 
 
-fn setup(mut commands: Commands, game_settings: Res<GameSettings>) {
+fn setup(mut commands: Commands) {
     commands.spawn(
         Camera2dBundle {
             camera_2d: Camera2d {
@@ -60,4 +66,14 @@ fn setup(mut commands: Commands, game_settings: Res<GameSettings>) {
         }
     );
 }
+
+pub fn exit_game(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut exit_writer: ResMut<Events<AppExit>>
+) {
+    if keyboard_input.just_pressed(KeyCode::Escape) {
+        exit_writer.send(AppExit);
+    }
+}
+
 
