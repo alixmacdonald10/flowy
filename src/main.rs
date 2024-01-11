@@ -10,7 +10,7 @@ use bevy::{
 
 use utils::colours::{GamePallete, get_colour};
 use utils::game_settings::GameSettings;
-use grid::grid::GridPlugin;
+use grid::GridPlugin;
 use crate::cursor::CursorPlugin;
 use crate::equipment::EquipmentPlugin;
 
