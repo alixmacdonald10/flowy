@@ -1,8 +1,7 @@
+mod main_menu;
+mod game;
+mod game_over;
 mod utils;
-mod grid;
-mod cursor;
-mod equipment;
-mod timer;
 
 use bevy::{
     prelude::*,
@@ -10,21 +9,24 @@ use bevy::{
     app::AppExit,
 };
 
+use main_menu::MainMenuPlugin;
 use utils::colours::{GamePallete, get_colour};
 use utils::game_settings::GameSettings;
-use grid::GridPlugin;
-use crate::cursor::CursorPlugin;
-use crate::equipment::EquipmentPlugin;
-use crate::timer::{GameTimer, tick_game_timer};
-
+use game::GamePlugin;
+use game_over::GameOverPlugin;
 
 const GAME_TITLE: &str = env!("CARGO_PKG_NAME");
 const GAME_VERSION: &str = env!("CARGO_PKG_VERSION");
 static SETTINGS_STR: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/game_settings.toml"));
 
 
-#[derive(Event)]
-pub struct GameOver;
+#[derive(States, Default, Debug, Clone, Copy, Eq, PartialEq, Hash)]
+pub enum AppState {
+    #[default]
+    MainMenu,
+    Game,
+    GameOver,
+}
 
 
 fn main() {
@@ -47,15 +49,12 @@ fn main() {
                 })
                 .build(),
         )
-        .init_resource::<GameSettings>()
-        .init_resource::<GameTimer>()
-        .add_event::<GameOver>()
+        .add_state::<AppState>()
+        .add_plugins(MainMenuPlugin)
+        .add_plugins(GamePlugin)
+        .add_plugins(GameOverPlugin)
         .add_systems(Startup, setup)
         .add_systems(Update, exit_game)
-        .add_systems(Update, tick_game_timer)
-        .add_plugins(GridPlugin)
-        .add_plugins(CursorPlugin)
-        .add_plugins(EquipmentPlugin)
         .run();
 }
 
