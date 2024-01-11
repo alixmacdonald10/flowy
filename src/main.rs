@@ -2,6 +2,7 @@ mod utils;
 mod grid;
 mod cursor;
 mod equipment;
+mod timer;
 
 use bevy::{
     prelude::*,
@@ -14,6 +15,7 @@ use utils::game_settings::GameSettings;
 use grid::GridPlugin;
 use crate::cursor::CursorPlugin;
 use crate::equipment::EquipmentPlugin;
+use crate::timer::{GameTimer, tick_game_timer};
 
 
 const GAME_TITLE: &str = env!("CARGO_PKG_NAME");
@@ -46,9 +48,11 @@ fn main() {
                 .build(),
         )
         .init_resource::<GameSettings>()
+        .init_resource::<GameTimer>()
         .add_event::<GameOver>()
         .add_systems(Startup, setup)
         .add_systems(Update, exit_game)
+        .add_systems(Update, tick_game_timer)
         .add_plugins(GridPlugin)
         .add_plugins(CursorPlugin)
         .add_plugins(EquipmentPlugin)
@@ -67,7 +71,8 @@ fn setup(mut commands: Commands) {
     );
 }
 
-pub fn exit_game(
+
+fn exit_game(
     keyboard_input: Res<Input<KeyCode>>,
     mut exit_writer: ResMut<Events<AppExit>>
 ) {
@@ -75,5 +80,3 @@ pub fn exit_game(
         exit_writer.send(AppExit);
     }
 }
-
-

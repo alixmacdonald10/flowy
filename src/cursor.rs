@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use crate::utils::colours::{GamePallete, get_colour};
 
 
 pub struct CursorPlugin;
@@ -7,9 +8,9 @@ pub struct CursorPlugin;
 impl Plugin for CursorPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Startup, spawn_cursor)
-            .add_systems(Update, handle_mouse_click);
-            // .add_systems(Update, render_cursor_mode_text);
+            .add_systems(Startup, (spawn_cursor, define_cursor_mode).chain())
+            .add_systems(Update, handle_mouse_click)
+            .add_systems(Update, render_cursor_mode_text);
     }
 }
 
@@ -44,6 +45,7 @@ pub fn handle_mouse_click(
 ) {
     let (entity, _, _, _) = q_cursor.get_single().unwrap();
 
+    // TODO: there is probably a better way to do this
     if input.just_pressed(MouseButton::Left) {
         if let (Ok(_), Err(_)) = (q_cursor.get_component::<PlacingComponents>(entity), q_cursor.get_component::<DeletingComponents>(entity)) {
             commands.entity(entity)
@@ -66,34 +68,44 @@ pub fn handle_mouse_click(
     }
 }
 
-// pub fn define_budget(
-//     mut commands: Commands,
-//     mut cursor: ResMut<Budget>,
-// ) {
-//     let font_handle: Handle<Font> = Default::default();
-//     budget.0 = game_settings.gameplay.budget;
+pub fn define_cursor_mode(
+    mut commands: Commands
+) {
+    let font_handle: Handle<Font> = Default::default();
 
-//     commands.spawn((TextBundle::from_sections([
-//         TextSection::new(
-//             "Budget:  ",
-//             TextStyle {
-//                 font: font_handle.clone(),
-//                 font_size: 60.0,
-//                 color: get_colour(GamePallete::Feldgrau),
-//             },
-//         ),
-//         TextSection::new(
-//             budget.0.to_string(),
-//             TextStyle {
-//                 font: font_handle.clone(),
-//                 font_size: 60.0,
-//                 color: get_colour(GamePallete::JapaneseIndigo),
-//             },
-//         )]),
-//         BudgetText
-//     ));
-// }
+    commands.spawn((TextBundle::from_sections([
+        TextSection::new(
+            "Cursor Mode:  ",
+            TextStyle {
+                font: font_handle.clone(),
+                font_size: 60.0,
+                color: get_colour(GamePallete::Feldgrau),
+            },
+        ),
+        TextSection::new(
+            "",
+            TextStyle {
+                font: font_handle.clone(),
+                font_size: 60.0,
+                color: get_colour(GamePallete::JapaneseIndigo),
+            },
+        )]),
+        CursorModeText
+    ));
+}
 
-// fn render_cursor_mode_text() {
-
-// }
+fn render_cursor_mode_text(
+    q_cursor: Query<(Entity, &Cursor, Option<&PlacingComponents>, Option<&DeletingComponents>)>,
+    mut q_cursor_mode_text: Query<&mut Text, With<CursorModeText>>,
+) {
+    let (entity, _, _, _) = q_cursor.get_single().unwrap();
+    let mode = match (q_cursor.get_component::<PlacingComponents>(entity), q_cursor.get_component::<DeletingComponents>(entity)) {
+        (Ok(_), Err(_)) => "Placing",
+        (Err(_), Ok(_)) => "Deleting",
+        (Err(_), Err(_)) => "None",
+        (Ok(_), Ok(_)) => panic!("Cursor is in both placing and deleting mode!"),
+    };
+    for mut text in &mut q_cursor_mode_text {
+        text.sections[1].value = mode.to_string();
+    }
+}
