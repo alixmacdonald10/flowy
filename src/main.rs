@@ -54,6 +54,8 @@ fn main() {
         .add_plugins(GamePlugin)
         .add_plugins(GameOverPlugin)
         .add_systems(Startup, setup)
+        .add_systems(Update, transition_to_game_state)
+        .add_systems(Update, transition_to_main_menu_state)
         .add_systems(Update, exit_game)
         .run();
 }
@@ -77,5 +79,33 @@ fn exit_game(
 ) {
     if keyboard_input.just_pressed(KeyCode::Escape) {
         exit_writer.send(AppExit);
+    }
+}
+
+
+
+fn transition_to_game_state(
+    mut commands: Commands,
+    input: Res<Input<KeyCode>>,
+    app_state: ResMut<State<AppState>>,
+) {
+    if input.just_pressed(KeyCode::G) {
+        if app_state.get() != &AppState::Game {
+            commands.insert_resource(NextState(Some(AppState::Game)));
+            println!("Entered AppState::Game");
+        }
+    }
+}
+
+fn transition_to_main_menu_state(
+    mut commands: Commands,
+    input: Res<Input<KeyCode>>,
+    app_state: ResMut<State<AppState>>,
+) {
+    if input.just_pressed(KeyCode::M) {
+        if app_state.get() != &AppState::MainMenu {
+            commands.insert_resource(NextState(Some(AppState::MainMenu)));
+            println!("Entered AppState::MainMenu");
+        }
     }
 }

@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 
-use super::GameOver;
+use crate::game::GameOver;
 use crate::utils::colours::{GamePallete, get_colour};
-
 
 #[derive(Resource)]
 pub struct GameTimer {
@@ -11,7 +10,6 @@ pub struct GameTimer {
 
 #[derive(Component)]
 pub struct GameTimerText;
-
 
 
 impl Default for GameTimer {
@@ -69,5 +67,14 @@ pub fn render_timer_text(
     // TODO: if within 10seconds change to red
     for mut text in &mut q_timer_text {
         text.sections[1].value = (timer.timer.remaining().as_secs_f32() as i32).to_string()
+    }
+}
+
+pub fn cleanup_timer(
+    mut commands: Commands,
+    q_timer: Query<(Entity, With<GameTimerText>)>,
+) {
+    if let Ok(timer) = q_timer.get_single() {
+        commands.entity(timer.0).despawn_recursive();
     }
 }

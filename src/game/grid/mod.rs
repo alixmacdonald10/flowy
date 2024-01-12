@@ -6,8 +6,10 @@ use bevy::{
     utils::Uuid,
     window::PrimaryWindow
 };
-// TODO: DECOUPLE GAME SETTINGS FROM GRID PLUGIN
+
 use crate::utils::game_settings::GameSettings;
+use crate::AppState;
+use crate::game::SimulationState;
 
 
 pub struct GridPlugin;
@@ -21,8 +23,11 @@ impl Plugin for GridPlugin {
             .init_resource::<XYIndex>()
             .init_resource::<Grid>()
             .init_resource::<CursorGridIdx>()
-            .add_systems(Startup, (create_grid_index, create_xy_index, create_grid, fill_all_cell_neighbours).chain())
-            .add_systems(Update, update_cursor_idx);
+            .add_systems(OnEnter(AppState::Game), (create_grid_index, create_xy_index, create_grid, fill_all_cell_neighbours).chain())
+            .add_systems(Update, update_cursor_idx
+                .run_if(in_state(AppState::Game))
+                .run_if(in_state(SimulationState::Running)))
+            .add_systems(OnExit(AppState::Game), cleanup_grid);
     }
 }
 
@@ -303,4 +308,13 @@ pub fn get_cell_id_from_x_y_index(x_index: usize, y_index: usize, grid_settings:
     grid_index.index
         .get(&CellCentre::new(x_centre, y_centre))
         .map(|idx| idx.to_owned())
+}
+
+fn cleanup_grid(
+    mut commands: Commands,
+    q_cells: Query<(Entity, &Cell)>,
+) {
+    for (entity, _) in q_cells.iter() {
+        commands.entity(entity).despawn_recursive();
+    }
 }

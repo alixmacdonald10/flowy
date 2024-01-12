@@ -8,8 +8,10 @@ use crate::utils::{
     colours::{GamePallete, get_colour},
     game_settings::GameSettings,
 };
-use super::grid::{GridSettings, Grid, CursorGridIdx};
-use super::cursor::{Cursor, DeletingComponents, PlacingComponents};
+use crate::game::grid::{GridSettings, Grid, CursorGridIdx};
+use crate::game::cursor::{Cursor, DeletingComponents, PlacingComponents};
+use crate::AppState;
+use crate::game::SimulationState;
 
 
 
@@ -19,8 +21,12 @@ impl Plugin for EquipmentPlugin {
     fn build(&self, app: &mut App) {
         app
             .init_resource::<Budget>()
-            .add_systems(Startup, define_budget)
-            .add_systems(Update, (flag_equipment, spawn_equipment, update_budget, render_budget, despawn_equipment).chain());
+            .add_systems(OnEnter(AppState::Game), define_budget)
+            .add_systems(Update, (flag_equipment, spawn_equipment, update_budget, render_budget, despawn_equipment)
+                .run_if(in_state(AppState::Game))
+                .run_if(in_state(SimulationState::Running))
+                .chain())
+            .add_systems(OnExit(AppState::Game), (cleanup_equipment, cleanup_budget));
     }
 }
 
@@ -202,3 +208,22 @@ pub fn render_budget(
         text.sections[1].value = budget.0.to_string();
     }
 }
+
+
+fn cleanup_equipment(
+    mut commands: Commands,
+    q_equipment: Query<Entity, With<Equipment>>,
+) {
+    for entity in q_equipment.iter() {
+        commands.entity(entity).despawn();
+    }
+}
+
+fn cleanup_budget(
+    mut commands: Commands,
+    q_budget_text: Query<Entity, With<BudgetText>>,
+) {
+    if let Ok(entity) = q_budget_text.get_single() {
+        commands.entity(entity).despawn_recursive();
+    }
+}  
