@@ -85,26 +85,24 @@ fn exit_game(
 
 
 fn transition_to_game_state(
-    mut commands: Commands,
     input: Res<Input<KeyCode>>,
-    app_state: ResMut<State<AppState>>,
+    mut app_state: ResMut<NextState<AppState>>,
 ) {
     if input.just_pressed(KeyCode::G) {
-        if app_state.get() != &AppState::Game {
-            commands.insert_resource(NextState(Some(AppState::Game)));
+        if app_state.0 != Some(AppState::Game) {
+            app_state.set(AppState::Game);
             println!("Entered AppState::Game");
         }
     }
 }
 
 fn transition_to_main_menu_state(
-    mut commands: Commands,
     input: Res<Input<KeyCode>>,
-    app_state: ResMut<State<AppState>>,
+    mut app_state: ResMut<NextState<AppState>>,
 ) {
     if input.just_pressed(KeyCode::M) {
-        if app_state.get() != &AppState::MainMenu {
-            commands.insert_resource(NextState(Some(AppState::MainMenu)));
+        if app_state.0 != Some(AppState::MainMenu) {
+            app_state.set(AppState::MainMenu);
             println!("Entered AppState::MainMenu");
         }
     }
